@@ -4,28 +4,29 @@
 # It also generates a file 'HZ_coefficients.dat' that gives the coefficients for 
 # the analytical expression.
 #
-# Ravi kumar Kopparapu April 19 2014
+# - Ravi kumar Kopparapu April 19 2014
+# - Translated to python code by John Armstrong (jcarmstrong@weber.edu) 04 June 2014
+# - Improved by Rodrigo Nemmen, Jan 6 2021
 #
-# Translated to python code by John Armstrong (jcarmstrong@weber.edu) 04 June 2014
 #************************************************************************************
 #************************************************************************************
-# Output files.
 
+import numpy as np
+
+# Output files.
 hzdat = open('HZs.dat', 'w')
 hzcoeff = open('HZ_coefficients.dat', 'w')
 
 #************************************************************************************
-# Coeffcients to be used in the analytical expression to calculate habitable zone flux 
+# Coefficients to be used in the analytical expression to calculate habitable zone flux 
 # boundaries
 
-seff = [0,0,0,0,0,0]
-seffsun  = [1.776,1.107, 0.356, 0.320, 1.188, 0.99] 
-a = [2.136e-4, 1.332e-4, 6.171e-5, 5.547e-5, 1.433e-4, 1.209e-4]
-b = [2.533e-8, 1.580e-8, 1.698e-9, 1.526e-9, 1.707e-8, 1.404e-8]
-c = [-1.332e-11, -8.308e-12, -3.198e-12, -2.874e-12, -8.968e-12, -7.418e-12]
-d = [-3.097e-15, -1.931e-15, -5.575e-16, -5.011e-16, -2.084e-15, -1.713e-15]
-
-
+seffsun  = np.array([1.776,1.107, 0.356, 0.320, 1.188, 0.99])
+a = np.array([2.136e-4, 1.332e-4, 6.171e-5, 5.547e-5, 1.433e-4, 1.209e-4])
+b = np.array([2.533e-8, 1.580e-8, 1.698e-9, 1.526e-9, 1.707e-8, 1.404e-8])
+c = np.array([-1.332e-11, -8.308e-12, -3.198e-12, -2.874e-12, -8.968e-12, -7.418e-12])
+d = np.array([-3.097e-15, -1.931e-15, -5.575e-16, -5.011e-16, -2.084e-15, -1.713e-15])
+    
 #************************************************************************************
 # Writing coefficients into 'HZ_coefficients.dat' file
 
@@ -38,7 +39,7 @@ hzcoeff.write('# i = 3 --> Maximum Greenhouse\n')
 hzcoeff.write('# i = 4 --> Early Mars\n')
 hzcoeff.write('# i = 5 --> Runaway Greenhouse for 5 ME\n')
 hzcoeff.write('# i = 6 --> Runaway Greenhouse for 0.1 ME\n')
-
+hzcoeff.write('#\n')
 hzcoeff.write('# First row: S_effSun(i)\n')
 hzcoeff.write('# Second row: a(i)\n')
 hzcoeff.write('# Third row:  b(i)\n')
@@ -84,7 +85,8 @@ hzcoeff.write('   '+'{:6.5e}'.format(d[0]) + '  ' +
 # Calculating HZ fluxes for stars with 2600 K < T_eff < 7200 K. The output file is
 # 'HZ_fluxes.dat'
 
-teff  = 2600.0
+temp = np.linspace(2600,7200,25)
+
 hzdat.write('#  Teff(K)        Recent        Runaway        Maximum        Early        5ME Runaway   0.1ME Runaway\n')
 hzdat.write('#                 Venus         Greenhouse     Greenhouse     Mars         Greenhouse    Greenhouse\n')
 
@@ -96,10 +98,10 @@ earlyMars = []
 fivemeRunaway = []
 tenthmeRunaway = []
 
-while(teff <= 7201.0): 
+for teff in temp:
   tstar = teff - 5780.0
   for i in range(len(a)):
-     seff[i] = seffsun[i] + a[i]*tstar + b[i]*tstar**2 + c[i]*tstar**3 + d[i]*tstar**4
+    seff = seffsun + a*tstar + b*tstar**2 + c*tstar**3 + d*tstar**4
 
   starTemp.append(teff)
   recentVenus.append(seff[0])
@@ -117,7 +119,6 @@ while(teff <= 7201.0):
               '{:6.6E}'.format(seff[4]) + ' ' +
               '{:6.6E}'.format(seff[5]) + '  ' +
               '\n')
-  teff = teff + 200.0
 
 print('************************************************************')
 print('')
